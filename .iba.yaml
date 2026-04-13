@@ -1,12 +1,31 @@
-# .iba.yaml - Team governance config
+# .iba.yaml - Team / Session Governance Configuration
+# Simple, human-readable config for IBA intent
+
 intent:
-  description: "Refactor payment module for 2x speed while preserving exact API contract and never touching customer data or production environment"
+  description: "General autonomous operation within approved scope. Focus on helpful, accurate, and safe actions only."
   scope:
-    - "src/payment/**"
-    - "tests/payment/**"
+    - "research"
+    - "analysis"
+    - "coding"
+    - "documentation"
   denied:
-    - "prod"
-    - "secrets"
-    - "db:write"
-  expires: "2026-12-31"
-  entropy_threshold: 0.12
+    - "production-deployment"
+    - "financial-transactions"
+    - "external-api-calls"
+    - "data-deletion"
+    - "unauthorized-access"
+  default_posture: "DENY_ALL"
+
+temporal_scope:
+  hard_expiry: "2026-12-31"   # Cannot be extended by the agent
+
+entropy_threshold:
+  max_kl_divergence: 0.12
+  flag_at: 0.08
+  kill_at: 0.12
+  replan_window_ms: 500
+
+# Optional team settings
+team_mode:
+  require_human_review_for: ["high-risk-actions"]
+  audit_level: "full"          # full | summary
