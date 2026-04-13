@@ -1,0 +1,5 @@
+
+### 2. `requirements.txt` (empty — zero new dependencies)
+
+```txt
+# No new dependencies — uses existing Claude Code + IBA core
