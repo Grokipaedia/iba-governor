@@ -1,23 +1,28 @@
-# .iba.yaml - Team / Session Governance Configuration
-# Simple, human-readable config for IBA intent
+# .iba.yaml - IBA Intent Bound Authorization Configuration
+# Patent GB2603013.0 (Pending) · intentbound.com
 
 intent:
-  description: "General autonomous operation within approved scope. Focus on helpful, accurate, and safe actions only."
-  scope:
-    - "research"
-    - "analysis"
-    - "coding"
-    - "documentation"
-  denied:
-    - "production-deployment"
-    - "financial-transactions"
-    - "external-api-calls"
-    - "data-deletion"
-    - "unauthorized-access"
-  default_posture: "DENY_ALL"
+  description: "Research and document AI governance developments. No deployment, no payments, no external APIs."
+
+scope:
+  - research
+  - analysis
+  - coding
+  - documentation
+
+denied:
+  - production-deployment
+  - financial-transactions
+  - data-deletion
+  - external-api-calls
+  - secret
+
+default_posture: "DENY_ALL"
+
+kill_threshold: "production-deployment | financial-transactions | data-deletion"
 
 temporal_scope:
-  hard_expiry: "2026-12-31"   # Cannot be extended by the agent
+  hard_expiry: "2026-12-31"
 
 entropy_threshold:
   max_kl_divergence: 0.12
@@ -25,7 +30,7 @@ entropy_threshold:
   kill_at: 0.12
   replan_window_ms: 500
 
-# Optional team settings
 team_mode:
-  require_human_review_for: ["high-risk-actions"]
-  audit_level: "full"          # full | summary
+  require_human_review_for:
+    - high-risk-actions
+  audit_level: "full"
