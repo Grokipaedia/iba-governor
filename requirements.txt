@@ -1,5 +1,5 @@
 
-### 2. `requirements.txt` (empty — zero new dependencies)
+### 2. `requirements.txt`
 
 ```txt
-# No new dependencies — uses existing Claude Code + IBA core
+# No new dependencies — uses existing agent framework + IBA core
