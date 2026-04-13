@@ -1,0 +1,12 @@
+# .iba.yaml - Team governance config
+intent:
+  description: "Refactor payment module for 2x speed while preserving exact API contract and never touching customer data or production environment"
+  scope:
+    - "src/payment/**"
+    - "tests/payment/**"
+  denied:
+    - "prod"
+    - "secrets"
+    - "db:write"
+  expires: "2026-12-31"
+  entropy_threshold: 0.12
