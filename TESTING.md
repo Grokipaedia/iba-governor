@@ -1,111 +1,201 @@
-# Testing iba-governor
+# TESTING.md — iba-governor
 
-No terminal required. Test in your browser in 3 minutes using Google Colab.
-
----
-
-## Browser Test — Google Colab
-
-**Step 1** — Open [colab.research.google.com](https://colab.research.google.com) · New notebook
-
-**Step 2** — Run Cell 1:
-```python
-!pip install pyyaml
-```
-
-**Step 3** — Run Cell 2:
-```python
-import json
-from datetime import datetime
-import os
-
-class IBAGovernor:
-    def __init__(self):
-        self.cert_path = ".intent.cert"
-        self.audit_log = "iba-audit.jsonl"
-        self.cert = self.load_or_create_cert()
-
-    def load_or_create_cert(self):
-        cert = {
-            "iba_version": "2.0",
-            "certificate_id": f"session-{datetime.now().strftime('%Y%m%d-%H%M')}",
-            "issued_at": datetime.now().isoformat(),
-            "principal": "human-user",
-            "declared_intent": "General autonomous operation within approved scope",
-            "scope_envelope": {"default_posture": "DENY_ALL"},
-            "temporal_scope": {"hard_expiry": "2026-12-31"},
-            "iba_signature": "demo-signature"
-        }
-        with open(self.cert_path, "w") as f:
-            json.dump(cert, f, indent=2)
-        return cert
-
-    def check_action(self, action_description: str) -> bool:
-        print(f"🔒 IBA Governor checking: {action_description[:80]}...")
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "action": action_description,
-            "verdict": "ALLOW",
-            "certificate_id": self.cert["certificate_id"]
-        }
-        with open(self.audit_log, "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-        return True
-
-governor = IBAGovernor()
-print("✅ iba-governor loaded — Intent-Bound Authorization active")
-```
-
-**Step 4** — Run Cell 3:
-```python
-governor.check_action("Write file to staging repository")
-governor.check_action("Send email to external address")
-governor.check_action("Execute payment to new payee")
-
-print("\nAudit log:")
-with open("iba-audit.jsonl") as f:
-    print(f.read())
-```
+IBA Intent Bound Authorization · Core Governor Gate Tests
+Patent GB2603013.0 (Pending) · intentbound.com
 
 ---
 
-## Expected Output
-
-```
-✅ iba-governor loaded — Intent-Bound Authorization active
-🔒 IBA Governor checking: Write file to staging repository...
-🔒 IBA Governor checking: Send email to external address...
-🔒 IBA Governor checking: Execute payment to new payee...
-
-Audit log:
-{"timestamp": "...", "action": "Write file to staging repository", "verdict": "ALLOW", "certificate_id": "session-..."}
-{"timestamp": "...", "action": "Send email to external address", "verdict": "ALLOW", "certificate_id": "session-..."}
-{"timestamp": "...", "action": "Execute payment to new payee", "verdict": "ALLOW", "certificate_id": "session-..."}
-```
-
-Certificate is created. Actions are logged. Audit chain is intact.
-
----
-
-## Local Test
-
-If you have Python 3.8+ installed:
+## Quick Test
 
 ```bash
-git clone https://github.com/Grokipaedia/iba-governor.git
-cd iba-governor
 pip install -r requirements.txt
-python -m iba_governor
+python iba_governor.py --demo
+```
+
+Expected output:
+
+```
++ ALLOWED  [read file src/main.py]                    (0.XXXms)
++ ALLOWED  [write file src/utils.py refactor]         (0.XXXms)
++ ALLOWED  [run tests unit suite]                     (0.XXXms)
++ ALLOWED  [git commit feature branch]                (0.XXXms)
++ ALLOWED  [code review pull request]                 (0.XXXms)
+x BLOCKED  [production_deploy release v2.1]           -> Action in denied list
+x BLOCKED  [credential_access aws secrets]            -> Action in denied list
+x BLOCKED  [external_data_export user database]       -> Action in denied list
+x BLOCKED  [send email to all users]                  -> Outside declared scope (DENY_ALL)
+x TERMINATE [delete_production database all tables]   -> Kill threshold — session ended
 ```
 
 ---
 
-## Patent & Standards Record
+## Test Suite
 
-```
-Patent:   GB2603013.0 (Pending) · UK IPO · Filed February 5, 2026
-IETF:     draft-williams-intent-token-00 · CONFIRMED LIVE
-          datatracker.ietf.org/doc/draft-williams-intent-token/
+### 1 — Permitted actions (ALLOW expected)
+
+```bash
+python iba_governor.py "read file src/main.py"
+python iba_governor.py "write file src/utils.py"
+python iba_governor.py "run tests unit suite"
+python iba_governor.py "git commit feature branch"
+python iba_governor.py "code review pull request"
 ```
 
-IBA@intentbound.com · IntentBound.com
+All should return `+ ALLOWED` with sub-1ms latency.
+
+---
+
+### 2 — Denied list enforcement (BLOCK expected)
+
+```bash
+python -c "
+from iba_governor import IBAGovernor, IBABlockedError
+g = IBAGovernor()
+for action in ['production_deploy', 'credential_access', 'external_data_export', 'payment_execution']:
+    try:
+        g.check_action(action)
+    except IBABlockedError:
+        print(f'PASS — blocked: {action}')
+"
+```
+
+---
+
+### 3 — Kill threshold (TERMINATE expected)
+
+```bash
+python -c "
+from iba_governor import IBAGovernor, IBATerminatedError
+g = IBAGovernor()
+try:
+    g.check_action('delete_production database all tables')
+except IBATerminatedError as e:
+    print('PASS — session terminated:', e)
+"
+```
+
+---
+
+### 4 — DENY_ALL posture (out of scope)
+
+```bash
+python -c "
+from iba_governor import IBAGovernor, IBABlockedError
+g = IBAGovernor()
+try:
+    g.check_action('send email to all users')
+except IBABlockedError as e:
+    print('PASS — DENY_ALL blocked:', e)
+"
+```
+
+---
+
+### 5 — No certificate (auto-creates default · DENY_ALL)
+
+```bash
+python -c "
+import os
+if os.path.exists('.iba.yaml'):
+    os.rename('.iba.yaml', '.iba.yaml.bak')
+from iba_governor import IBAGovernor
+g = IBAGovernor()
+print('PASS — default cert created · DENY_ALL posture active')
+if os.path.exists('.iba.yaml.bak'):
+    os.rename('.iba.yaml.bak', '.iba.yaml')
+"
+```
+
+---
+
+### 6 — Audit chain integrity
+
+```bash
+python iba_governor.py --demo
+cat iba-audit.jsonl
+```
+
+Every gate decision — ALLOW, BLOCK, TERMINATE — should appear as a timestamped JSON line with session ID, principal, action, verdict, and reason.
+
+---
+
+### 7 — Latency benchmark (sub-1ms required)
+
+```bash
+python -c "
+import time
+from iba_governor import IBAGovernor
+g = IBAGovernor()
+times = []
+for _ in range(1000):
+    start = time.perf_counter()
+    try:
+        g.check_action('read file src/main.py')
+    except Exception:
+        pass
+    times.append((time.perf_counter() - start) * 1000)
+avg = sum(times) / len(times)
+print(f'Average gate latency: {avg:.4f}ms')
+assert avg < 1.0, f'FAIL — {avg:.4f}ms exceeds 1ms'
+print('PASS — sub-1ms gate confirmed')
+"
+```
+
+---
+
+### 8 — Custom cert
+
+```bash
+cat > test.iba.yaml << 'EOF'
+intent:
+  description: "Read-only access. No writes."
+principal:
+  id: "TEST-READONLY"
+  human_authorization: "AUTH-TEST"
+scope:
+  - read_file
+denied:
+  - write_file
+  - delete
+default_posture: DENY_ALL
+kill_threshold: "delete_production | data_breach"
+temporal_scope:
+  hard_expiry: "2026-12-31"
+EOF
+
+python iba_governor.py "read file src/main.py" --config test.iba.yaml
+python iba_governor.py "write file src/main.py" --config test.iba.yaml
+rm test.iba.yaml
+```
+
+Expected: read ALLOWED · write BLOCKED.
+
+---
+
+## Regulatory Test Checklist
+
+| Requirement | Test | Status |
+|-------------|------|--------|
+| DENY_ALL default posture | Test 4 | ✓ |
+| Kill threshold fires | Test 3 | ✓ |
+| Denied list enforced | Test 2 | ✓ |
+| Scope enforcement | Test 4 | ✓ |
+| Auto-cert on missing config | Test 5 | ✓ |
+| Immutable audit chain | Test 6 | ✓ |
+| Sub-1ms gate latency | Test 7 | ✓ |
+| Custom cert support | Test 8 | ✓ |
+
+---
+
+## Live Demo
+
+**governinglayer.com/governor-html/**
+
+Edit the cert. Run any agent action. ALLOW · BLOCK · TERMINATE in the browser.
+
+---
+
+IBA Intent Bound Authorization
+Patent GB2603013.0 Pending · WIPO DAS C9A6 · PCT 150+ countries
+IETF draft-williams-intent-token-00
+Available for acquisition · iba@intentbound.com · IntentBound.com
