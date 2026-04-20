@@ -1,36 +1,62 @@
-Copyright (c) 2026 Jeffrey Williams · IntentBound.com · IBA@intentbound.com
+PROPRIETARY LICENSE
 
-INTENT BOUND AUTHORIZATION — PROPRIETARY LICENSE
+IBA Intent Bound Authorization — iba-governor
+Copyright © 2026 Jeffrey Williams. All rights reserved.
 
-Patent GB2603013.0 (Pending) · UK IPO · Filed February 5, 2026
-PCT Coverage: 150+ Countries · Protected Until August 2028
+Patent Application GB2603013.0 (Pending) · UK IPO · Filed February 5, 2026
+WIPO DAS Confirmed April 15, 2026 · Access Code C9A6
+PCT 150+ countries · Protected until August 2028
 IETF draft-williams-intent-token-00
 
-All rights reserved.
+---
 
-This repository and its contents — including but not limited to all
-source code, documentation, architecture specifications, diagrams,
-demonstration materials, and README files — are the proprietary
-intellectual property of Jeffrey Williams and are protected by:
+GRANT OF LICENSE
 
-  · UK patent application GB2603013.0 (pending, filed February 5, 2026)
-  · PCT international patent coverage in 150+ countries
-  · Copyright law in all applicable jurisdictions
+Permission is granted to view, clone, and run this software for
+evaluation and research purposes only.
 
-PERMITTED:
-  · Viewing and reading this repository for evaluation purposes
-  · Linking to this repository for reference or citation
-  · Referencing this repository in academic, journalistic, or
-    standards-body contexts with attribution
+The following are expressly prohibited without written permission
+from the copyright holder:
 
-NOT PERMITTED without express written authorisation from Jeffrey Williams:
-  · Copying, reproducing, or distributing any part of this repository
-  · Implementing or deploying the IBA architecture or any substantial
-    part of it in any product, service, or system
-  · Creating derivative works based on this repository
-  · Using this repository or its contents for commercial purposes
-  · Filing patent applications that overlap with the claims of
-    GB2603013.0 or the PCT application derived from it
+  · Commercial use or deployment
+  · Modification or derivative works
+  · Redistribution or sublicensing
+  · Use in any product or service
+  · Patent or IP claim based on this work
 
-ACQUISITION & LICENSING:
-  IBA Intent Bound Authorization is available for acquisitio
+---
+
+PATENT NOTICE
+
+This software implements methods and systems covered by Patent
+Application GB2603013.0 (Pending), filed February 5, 2026 with
+the UK Intellectual Property Office.
+
+PCT rights are preserved across 150+ countries through August 2028.
+
+Use of the IBA Intent Certificate, DENY_ALL posture, pre-execution
+gate, or any substantially similar implementation in a commercial
+context requires a license from the patent holder.
+
+---
+
+ACQUISITION
+
+IBA Intent Bound Authorization is available for acquisition.
+
+Contact: iba@intentbound.com
+Web:     IntentBound.com
+IETF:    datatracker.ietf.org/doc/draft-williams-intent-token/
+
+---
+
+DISCLAIMER
+
+THIS SOFTWARE IS PROVIDED FOR EVALUATION PURPOSES ONLY.
+NO WARRANTY IS GIVEN, EXPRESS OR IMPLIED.
+
+---
+
+© 2026 Jeffrey Williams · Chiang Mai, Thailand
+iba@intentbound.com · IntentBound.com
+Patent GB2603013.0 Pending · WIPO DAS C9A6
